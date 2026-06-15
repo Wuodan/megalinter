@@ -114,5 +114,28 @@ Disabled until find a way to run with default options
     }
     assert(stdout, "stdout is set");
   }).timeout(600000);
+
+  it("(CLI) run csharpier fixture", async () => {
+    const params = [
+      "--path",
+      "./../.automation/test/csharp_csharpier",
+      "--release",
+      release,
+      "-e",
+      '"ENABLE_LINTERS=CSHARP_CSHARPIER"',
+    ];
+    if (nodockerpull) {
+      params.push("--nodockerpull");
+    }
+    if (process.env.MEGALINTER_IMAGE) {
+      params.push("--image");
+      params.push(process.env.MEGALINTER_IMAGE);
+    }
+    const { stdout, stderr } = await exec(MEGA_LINTER + params.join(" "));
+    if (stderr) {
+      console.error(stderr);
+    }
+    assert(stdout, "stdout is set");
+  }).timeout(600000);
 });
 /* jscpd:ignore-end */
