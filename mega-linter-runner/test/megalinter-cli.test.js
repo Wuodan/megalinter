@@ -1,6 +1,9 @@
 /* jscpd:ignore-start */
 import assert from 'assert';
 import { exec as childProcessExec } from "child_process";
+import os from "os";
+import path from "path";
+import fs from "fs-extra";
 import * as  util from "util";
 const exec = util.promisify(childProcessExec);
 
@@ -43,7 +46,9 @@ describe("CLI", function () {
       done();
       return;
     }
-    exec(`printf 'y\\ny\\n' | ${MEGA_LINTER} --upgrade`)
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "megalinter-upgrade-"));
+    fs.writeFileSync(path.join(tempDir, ".mega-linter.yml"), "ENABLE_LINTERS:\n  - YAML_PRETTIER\n");
+    exec(`printf 'y\\ny\\n' | ${MEGA_LINTER} --upgrade`, { cwd: tempDir })
       .then((res) => {
         const stdout = res.stdout;
         const stderr = res.stderr;
@@ -55,9 +60,11 @@ describe("CLI", function () {
           stdout.includes("mega-linter-runner applied"),
           'stdout should contains "mega-linter-runner applied"'
         );
+        fs.removeSync(tempDir);
         done();
       })
       .catch((err) => {
+        fs.removeSync(tempDir);
         done(err);
         throw err;
       });
