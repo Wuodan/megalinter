@@ -219,6 +219,18 @@ export const optionsDefinition = optionator.default({
         "Keep the MegaLinter container after the run. Useful for `docker logs <container>` post-mortem.",
     },
     {
+      option: "user-map",
+      type: "Boolean",
+      description:
+        "Run the container with the host UID/GID on POSIX systems so files created in bind mounts stay owned by the local user. Disable with --no-user-map if your container engine or mount backend does not behave correctly with user mapping.",
+    },
+    {
+      option: "no-user-map",
+      type: "Boolean",
+      description:
+        "Do not run the container with the host UID/GID. Useful if your container engine or mount backend does not behave correctly with user mapping.",
+    },
+    {
       option: "codetotal",
       type: "Boolean",
       description:

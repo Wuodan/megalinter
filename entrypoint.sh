@@ -6,6 +6,10 @@ export PYTHONPATH
 # Manage debug mode
 LOG_LEVEL="${LOG_LEVEL:-INFO}" # Default log level (VERBOSE, DEBUG, TRACE)
 
+if [ -n "${HOME:-}" ]; then
+  mkdir -p "${HOME}"
+fi
+
 # Manage newest git versions (related to CVE https://github.blog/2022-04-12-git-security-vulnerability-announced/)
 #
 if [[ "${WORKSPACE_AS_SAFE_DIR}" != 'false' && "${DEFAULT_WORKSPACE}" && -d "${DEFAULT_WORKSPACE}" ]]; then
