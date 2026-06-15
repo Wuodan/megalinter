@@ -43,8 +43,7 @@ describe("CLI", function () {
       done();
       return;
     }
-    const params = ["--upgrade"];
-    exec(MEGA_LINTER + params.join(" "))
+    exec(`printf 'y\\ny\\n' | ${MEGA_LINTER} --upgrade`)
       .then((res) => {
         const stdout = res.stdout;
         const stderr = res.stderr;
