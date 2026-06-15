@@ -103,7 +103,7 @@ serve = "mkdocs serve --dev-addr localhost:8000 {args}"
 [tool.hatch.envs.build]
 template = "docs"
 [tool.hatch.envs.build.scripts]
-all = ["build --doc --stats --dependents {args}", "hatch run docs:build"]
+all = ["build-py --doc --stats --dependents {args}", "hatch run docs:build"]
 build-sh = "./build.sh {args}"
 build-py = "hatch run python .automation/build.py {args}"
 build = ["build-py", "hatch run docs:build"]
