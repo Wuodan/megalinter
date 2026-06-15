@@ -89,7 +89,21 @@ Disabled until find a way to run with default options
       path: "./..",
       release,
       nodockerpull,
-      env: ["ENABLE=YAML"],
+      env: ["ENABLE=YAML", "PLUGINS="],
+    };
+    if (process.env.MEGALINTER_IMAGE) {
+      options.image = process.env.MEGALINTER_IMAGE;
+    }
+    const res = await new MegaLinterRunner().run(options);
+    assert(res.status === 0, `status is 0 (${res.status} returned)`);
+  }).timeout(600000);
+
+  it("(Module) run rust clippy fixture", async () => {
+    const options = {
+      path: "./../.automation/test/rust/good",
+      release,
+      nodockerpull,
+      env: ["ENABLE_LINTERS=RUST_CLIPPY", "PLUGINS="],
     };
     if (process.env.MEGALINTER_IMAGE) {
       options.image = process.env.MEGALINTER_IMAGE;
