@@ -110,7 +110,7 @@ else
   if [ "${MEGALINTER_SSH}" == "true" ]; then
     # MegaLinter SSH server
     set -eu
-    SSH_VOLUME_FOLDER=/root/docker_ssh
+    SSH_VOLUME_FOLDER=/tmp/docker_ssh
     if [ -d "$SSH_VOLUME_FOLDER" ]; then
       # SSH key copy from local volume
       echo "Docker ssh folder content:"
@@ -120,7 +120,7 @@ else
       touch ~/.ssh/authorized_keys
       chmod 600 ~/.ssh/authorized_keys
       cat $SSH_VOLUME_FOLDER/id_rsa.pub >>~/.ssh/authorized_keys
-      chmod 644 /root/.ssh/authorized_keys
+      chmod 644 ~/.ssh/authorized_keys
       mkdir -p /var/run/sshd
       ssh-keygen -A
       sed -i s/^#PasswordAuthentication\ yes/PasswordAuthentication\ no/ /etc/ssh/sshd_config
