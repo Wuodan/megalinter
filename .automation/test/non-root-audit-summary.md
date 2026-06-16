@@ -100,7 +100,7 @@ These are ugly but are not the main runtime problem.
 - `/root/.npm/_cacache`
 - `/root/.wget-hsts`
 - `/root/.perl-cpm`
-- `--mount=type=cache,target=/root/.cache/uv`
+- `--mount=type=cache,target=/tmp/.cache/uv`
 - `rm -rf /root/.cache`
 
 These can be cleaned later, but they are not the primary blockers for non-root runtime.
