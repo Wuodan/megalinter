@@ -106,6 +106,46 @@ After baseline runtime coverage exists, run relevant checks in both modes:
 1. default/root container mode
 2. mapped-user/non-root mode on POSIX hosts
 
+## Current Status
+
+The `mega-linter-runner/test/runtime-image.test.js` smoke file now covers these areas in both root and non-root modes:
+
+- PHP via `PHP_PHPCSFIXER`
+- .NET via `CSHARP_CSHARPIER`
+- Rust via `RUST_CLIPPY`
+- npm-backed tooling via `JSON_NPM_PACKAGE_JSON_LINT`
+- Salesforce via `SALESFORCE_CODE_ANALYZER_APEX`
+- SSH
+
+Current observed behavior on the intermediate branch state:
+
+- root mode passes for all of the above
+- non-root mode passes for:
+  - `JSON_NPM_PACKAGE_JSON_LINT`
+- non-root mode currently fails for:
+  - `PHP_PHPCSFIXER`
+  - `CSHARP_CSHARPIER`
+  - `RUST_CLIPPY`
+  - `SALESFORCE_CODE_ANALYZER_APEX`
+  - `SSH`
+
+Current non-root failure signatures:
+
+- PHP:
+  - `Permission denied: 'php-cs-fixer'`
+- .NET:
+  - `Permission denied: 'csharpier'`
+- Rust:
+  - `Permission denied: 'cargo-clippy'`
+- Salesforce:
+  - `uv_os_get_passwd returned ENOENT`
+  - this is an arbitrary-UID / passwd-entry problem rather than just a binary permission problem
+- SSH:
+  - no published `22/tcp`
+  - indicates `sshd` did not start successfully in non-root mode
+
+This is the expected red/green split before the corresponding non-root migration commits are applied one by one.
+
 ## Recommended Minimal Set
 
 If this needs to stay small, the highest-value baseline set is:
