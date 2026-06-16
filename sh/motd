@@ -9,7 +9,7 @@ You can run the following commands:
 
 - load the environment variables configured during Dockerfile creation
 
-    - set -a; . /var/ml-env-vars; set +a
+    - set -a; . /tmp/ml-env-vars; set +a
 
 - Run MegaLinter
 
@@ -22,4 +22,3 @@ You can run the following commands:
 
     - megalinter_exec --input myrepository --output myoutputfile.sarif                                                   (from inside the container in an interactive bash shell)
     - ssh@megalinter-container "/bin/bash --login -c 'megalinter_exec --input myrepository --output myoutputfile.sarif'" (from outside the container, using ssh to run a command in the container)
-

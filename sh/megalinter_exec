@@ -36,7 +36,7 @@ INPUT=""
 OUTPUT=""
 CAPTURE_STD=""
 VERBOSE=0
-ML_ENV_VARS=/var/ml-env-vars
+ML_ENV_VARS=/tmp/ml-env-vars
 ML_ENV_FIX_COMMAND="set -a; . ${ML_ENV_VARS}; set +a"
 
 # parse command line arguments

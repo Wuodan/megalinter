@@ -111,6 +111,7 @@ else
     # MegaLinter SSH server
     set -eu
     SSH_VOLUME_FOLDER=/tmp/docker_ssh
+    ML_ENV_VARS=/tmp/ml-env-vars
     if [ -d "$SSH_VOLUME_FOLDER" ]; then
       # SSH key copy from local volume
       echo "Docker ssh folder content:"
@@ -121,17 +122,39 @@ else
       chmod 600 ~/.ssh/authorized_keys
       cat $SSH_VOLUME_FOLDER/id_rsa.pub >>~/.ssh/authorized_keys
       chmod 644 ~/.ssh/authorized_keys
+    fi
+    # SSH startup
+    echo "[MegaLinter init] SSH"
+    export -p >"${ML_ENV_VARS}" # save all environment variables configured during Dockerfile creation
+    # root user in container
+    if [ "$(id -u)" -eq 0 ]; then
       mkdir -p /var/run/sshd
       ssh-keygen -A
       sed -i s/^#PasswordAuthentication\ yes/PasswordAuthentication\ no/ /etc/ssh/sshd_config
       sed -i s/^#PermitRootLogin\ prohibit-password/PermitRootLogin\ yes/ /etc/ssh/sshd_config
       sed -i s/^#PermitUserEnvironment\ no/PermitUserEnvironment\ yes/ /etc/ssh/sshd_config
       echo "root:root" | chpasswd
+      /usr/sbin/sshd -D
+    # non-root user matching host user in container
+    else
+      SSH_PORT=2222
+      SSH_RUNTIME_DIR=/tmp/megalinter-sshd
+      SSH_HOST_KEY="${SSH_RUNTIME_DIR}/ssh_host_ed25519_key"
+      mkdir -p "${SSH_RUNTIME_DIR}"
+      if [ ! -f "${SSH_HOST_KEY}" ]; then
+        ssh-keygen -t ed25519 -f "${SSH_HOST_KEY}" -N ''
+      fi
+      /usr/sbin/sshd -D \
+        -o "Port ${SSH_PORT}" \
+        -o "HostKey ${SSH_HOST_KEY}" \
+        -o "AuthorizedKeysFile ${HOME}/.ssh/authorized_keys" \
+        -o "PasswordAuthentication no" \
+        -o "PermitRootLogin no" \
+        -o "PermitUserEnvironment yes" \
+        -o "UsePAM no" \
+        -o "PidFile ${SSH_RUNTIME_DIR}/sshd.pid" \
+        -o "Subsystem sftp internal-sftp"
     fi
-    # SSH startup
-    echo "[MegaLinter init] SSH"
-    export -p >/var/ml-env-vars # save all environment variables configured during Dockerfile creation
-    /usr/sbin/sshd -D
   else
     # Normal  (run megalinter)
     echo "[MegaLinter init] ONE-SHOT RUN"
