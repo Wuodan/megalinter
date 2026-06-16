@@ -53,85 +53,96 @@ Source changes:
 
 ## Remaining `/root/...` Categories
 
-### 1. Real runtime blockers
+### 1. Fixed source definitions
 
-These still matter for non-root execution and should be treated as follow-up work.
+These were real first-party `/root/...` definitions and were migrated out of `/root`.
 
-#### PHP Composer tool path
+- PHP Composer tool path:
+  - `megalinter/descriptors/php.megalinter-descriptor.yml`
+  - moved from `/root/.composer/vendor/bin` to `/usr/local/composer/vendor/bin`
+- SSH support path:
+  - `.automation/build.py`
+  - `entrypoint.sh`
+  - moved from `/root/docker_ssh` to `/tmp/docker_ssh`
+  - `entrypoint.sh` no longer hard-codes `/root/.ssh/authorized_keys`
+- npm global prefix:
+  - `.automation/build.py`
+  - now emits `npm config set prefix /usr/local`
+- cache paths:
+  - `Dockerfile`
+  - `.automation/build.py`
+  - `megalinter/descriptors/scala.megalinter-descriptor.yml`
+  - migrated selected first-party `/root/.cache...` paths to `/tmp/.cache...`
+  - this now looks debatable rather than clearly required; build-time cache mounts may reasonably stay under `/root`
 
-Still present:
+### 2. Remaining first-party source definitions
 
-- `ENV PATH="/root/.composer/vendor/bin:${PATH}"`
+These are still present in non-generated sources, but they are build-time cleanup only.
 
-Relevant sources:
+- `megalinter/descriptors/salesforce.megalinter-descriptor.yml`
+  - multiple `rm -rf /root/.npm/_cacache`
+  - npm cleanup-only
+- `megalinter/descriptors/perl.megalinter-descriptor.yml`
+  - `rm -rf /root/.perl-cpm`
+  - cleanup-only
+- `megalinter/descriptors/dart.megalinter-descriptor.yml`
+  - `rm "/root/.wget-hsts"`
+  - cleanup-only
 
-- `megalinter/descriptors/php.megalinter-descriptor.yml`
-- generated PHP Dockerfiles
+These do not look like non-root runtime blockers.
 
-Observed effect in non-root image check:
+### 2a. Build-time cache paths
 
-- `phpcs`
-- `phpstan`
-- `psalm`
-- `phplint`
-- `php-cs-fixer`
+These should be treated separately from runtime path problems.
 
-were not found.
+- `--mount=type=cache,target=/root/.cache/uv`
+- similar cache-mount patterns
 
-This is the clearest next target after Rust and .NET.
+Current conclusion:
 
-#### SSH support path
+- these are build-time cache locations, not runtime install paths
+- they do not appear to be the same class of non-root problem as `/root/.composer`, `/root/docker_ssh`, or `/root/.dotnet/tools`
+- unless they are shown to cause an actual build/runtime issue, they are probably better left unchanged
 
-Still present:
+### 3. Generated residue
 
-- `mkdir /root/docker_ssh`
+These are checked-in generated files that still contain `/root/...` and should not be patched directly.
 
-Source:
+- generated Dockerfiles under `flavors/` and `linters/`
+- generated docs under `docs/descriptors/`
 
-- `.automation/build.py`
+Current recurring generated patterns:
 
-This is likely to break SSH-related features under non-root.
-
-### 2. Harmless build-time or cleanup leftovers
-
-These are ugly but are not the main runtime problem.
-
-- `/root/.cache/...`
 - `/root/.npm/_cacache`
-- `/root/.wget-hsts`
 - `/root/.perl-cpm`
-- `--mount=type=cache,target=/tmp/.cache/uv`
-- `rm -rf /root/.cache`
+- `/root/.wget-hsts`
+- some stale `/root/docker_ssh` hits if the corresponding generated Dockerfiles were not refreshed
 
-These can be cleaned later, but they are not the primary blockers for non-root runtime.
+If source has already been fixed but generated files still show `/root/...`, regeneration is incomplete or stale.
 
-### 3. Cases worth reviewing, but not the first priority
+### 4. Third-party / captured output
 
-#### npm
+Some `/root/...` hits are not first-party definitions but text emitted by tools or copied from their docs/help output.
 
-Your other project uses:
+Examples:
 
-- `npm config set prefix /usr/local`
+- `.automation/generated/linter-helps.json`
+- `docs/descriptors/php_php_cs_fixer.md`
+- tool help/docs mentioning defaults such as:
+  - `/root/.cache/trivy`
+  - `/root/.kubescape`
+  - `/root/.config/helm/...`
+  - `/root/.config/luacheck/...`
 
-That is sensible for true global npm installs.
+These should be treated separately from actual runtime path definitions.
 
-But this repo's main generated npm install path is different:
+### 5. npm-specific note
 
-- `.automation/build.py` installs npm packages into `/node-deps/node_modules/.bin`
-- that is a local install path, not the global npm prefix
+`npm config set prefix /usr/local` is now defined in source, but the main MegaLinter npm install path is still:
 
-So:
+- `/node-deps/node_modules/.bin`
 
-- changing npm prefix is useful for real global npm installs
-- but it does not solve the main `/node-deps` install path by itself
-
-Observed non-root check still showed some npm-based CLIs missing, but they were not yet categorized into:
-
-- actually broken install path
-- not present in the built image
-- simply not covered by the tested image/flavor
-
-This should be audited after PHP and SSH.
+So npm prefix cleanup and `/node-deps` behavior are separate topics.
 
 ## Test Coverage Status
 
@@ -161,19 +172,18 @@ To validate install-path changes, a real image build from the updated Dockerfile
 ## Useful Conclusions From This Session
 
 1. Rust and .NET had real non-root runtime failures and were fixed by moving installs out of `/root`.
-2. PHP Composer tools are very likely the next real runtime blocker.
-3. `/root/docker_ssh` is likely another real blocker for SSH mode.
-4. Many remaining `/root/...` references are just cache or cleanup paths and are lower priority.
-5. npm needs a narrower audit:
-   - global npm installs may benefit from `/usr/local` prefix
-   - local `/node-deps` installs are a separate mechanism
+2. PHP and SSH first-party `/root/...` definitions were also moved out of `/root`.
+3. The remaining `/root/...` hits are now a mix of:
+   - first-party cleanup paths still in descriptors
+   - stale/generated Dockerfiles/docs
+   - third-party help/default-path output
+4. At this stage, the main value of further cleanup is audit clarity, not just runtime correctness.
+5. npm still needs separate review for `/node-deps`, which is different from global npm prefix handling.
 
 ## Suggested Next Tasks
 
-1. Move PHP Composer-installed tools out of `/root/.composer/vendor/bin` into a neutral runtime path.
-2. Replace `/root/docker_ssh` with a non-root-safe location.
-3. Re-check the non-root command availability inside the rebuilt image.
-4. Only then continue with npm-specific cleanup or global prefix changes.
+1. Rebuild/regenerate and verify which generated Dockerfiles/docs still contain stale `/root/...` content.
+2. Consider reverting `/root/.cache -> /tmp/.cache` changes if the goal is to keep build-time cache mounts out of scope.
 
 ## Commands That Were Useful
 
