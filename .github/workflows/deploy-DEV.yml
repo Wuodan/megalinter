@@ -384,10 +384,25 @@ jobs:
       security-events: write
     timeout-minutes: 30
     steps:
+
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
+
       - name: Checkout Code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
 
       - name: Free Disk space
         shell: bash
@@ -399,11 +414,25 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           sudo rm -rf /opt/hostedtoolcache/go
 
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
+
       - name: Download image artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: megalinter-image
           path: /tmp
+
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
 
       - name: Load Docker image
         shell: bash
@@ -412,6 +441,13 @@ jobs:
           docker load -i /tmp/megalinter-image.tar
           rm -f /tmp/megalinter-image.tar
           docker image ls
+
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -426,6 +462,13 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           timeout: 15m0s
+
+      - name: Print disk space
+        shell: bash
+        run: |
+          df -h
+          echo
+          du -sh "$RUNNER_TEMP" "$GITHUB_WORKSPACE" 2>/dev/null
 
       # - name: Run OSV-Scanner vulnerability scanner
       #   uses: google/osv-scanner-action/osv-scanner-action@v2.3.5
