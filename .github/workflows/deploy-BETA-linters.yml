@@ -78,9 +78,16 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.get-linters-matrix.outputs.jobs) }}
     # Only run this on the main repo
+    # if: >-
+    #   (
+    #        github.repository == 'oxsecurity/megalinter'
+    #     && !contains(github.event.head_commit.message, 'skip deploy')
+    #     && !contains(github.event.head_commit.message, 'Release MegaLinter v')
+    #     && vars.BETA_LINTERS_ENABLED != 'false'
+    #   )
     if: >-
       (
-           github.repository == 'oxsecurity/megalinter'
+           github.repository == 'Wuodan/megalinter'
         && !contains(github.event.head_commit.message, 'skip deploy')
         && !contains(github.event.head_commit.message, 'Release MegaLinter v')
         && vars.BETA_LINTERS_ENABLED != 'false'
