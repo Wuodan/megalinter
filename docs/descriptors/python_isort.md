@@ -29,7 +29,7 @@ description: How to use isort (configure, ignore files, ignore errors, help & ve
 
 ## isort documentation
 
-- Version in MegaLinter: **6.0.1**
+- Version in MegaLinter: **8.0.1**
 - Visit [Official Web Site](https://pycqa.github.io/isort/){target=_blank}
 - See [How to configure isort rules](https://pycqa.github.io/isort/docs/configuration/config_files.html){target=_blank}
   - If custom `.isort.cfg` config file isn't found, [.isort.cfg](https://github.com/oxsecurity/megalinter/tree/main/TEMPLATES/.isort.cfg){target=_blank} will be used
@@ -51,7 +51,7 @@ description: How to use isort (configure, ignore files, ignore errors, help & ve
 | PYTHON_ISORT_FILTER_REGEX_INCLUDE        | Custom regex including filter<br/>Ex: `(src\|lib)`                                                                                                                                                                  | Include every file                              |
 | PYTHON_ISORT_FILTER_REGEX_EXCLUDE        | Custom regex excluding filter<br/>Ex: `(test\|examples)`                                                                                                                                                            | Exclude no file                                 |
 | PYTHON_ISORT_CLI_LINT_MODE               | Override default CLI lint mode<br/>- `file`: Calls the linter for each file<br/>- `list_of_files`: Call the linter with the list of files as argument<br/>- `project`: Call the linter from the root of the project | `list_of_files`                                 |
-| PYTHON_ISORT_FILE_EXTENSIONS             | Allowed file extensions. `"*"` matches any extension, `""` matches empty extension. Empty list excludes all files<br/>Ex: `[".py", ""]`                                                                             | `[".py"]`                                       |
+| PYTHON_ISORT_FILE_EXTENSIONS             | Allowed file extensions. `"*"` matches any extension, `""` matches empty extension. Empty list excludes all files<br/>Ex: `[".py", ""]`                                                                             | `[".py", ".pyi", ".pyx", ".pxd"]`               |
 | PYTHON_ISORT_FILE_NAMES_REGEX            | File name regex filters. Regular expression list for filtering files by their base names using regex full match. Empty list includes all files<br/>Ex: `["Dockerfile(-.+)?", "Jenkinsfile"]`                        | Include every file                              |
 | PYTHON_ISORT_PRE_COMMANDS                | List of bash commands to run before the linter                                                                                                                                                                      | None                                            |
 | PYTHON_ISORT_POST_COMMANDS               | List of bash commands to run after the linter                                                                                                                                                                       | None                                            |
@@ -79,16 +79,16 @@ This linter is available in the following flavors
 
 |                                                                         <!-- -->                                                                         | Flavor                                                       | Description                                     | Embedded linters |                                                                                                                                                                                             Info |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------|:------------------------------------------------|:----------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/beta/supported-linters/)         | Default MegaLinter Flavor                       |       126        |                       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
-|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/beta/flavors/cupcake/)       | MegaLinter for the most commonly used languages |        87        |       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
-|     <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/formatters.ico" alt="" height="32px" class="megalinter-icon"></a>      | [formatters](https://megalinter.io/beta/flavors/formatters/) | Contains only formatters                        |        18        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-formatters/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-formatters) |
-|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/python.ico" alt="" height="32px" class="megalinter-icon"></a>        | [python](https://megalinter.io/beta/flavors/python/)         | Optimized for PYTHON based projects             |        65        |         ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-python/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-python) |
+| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/beta/supported-linters/)         | Default MegaLinter Flavor                       |       137        |                       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
+|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/beta/flavors/cupcake/)       | MegaLinter for the most commonly used languages |        93        |       ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
+|     <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/formatters.ico" alt="" height="32px" class="megalinter-icon"></a>      | [formatters](https://megalinter.io/beta/flavors/formatters/) | Contains only formatters                        |        19        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-formatters/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-formatters) |
+|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/python.ico" alt="" height="32px" class="megalinter-icon"></a>        | [python](https://megalinter.io/beta/flavors/python/)         | Optimized for PYTHON based projects             |        70        |         ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-python/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-python) |
 
 ## Behind the scenes
 
 ### How are identified applicable files
 
-- File extensions: `.py`
+- File extensions: `.py`, `.pyi`, `.pyx`, `.pxd`
 
 <!-- markdownlint-disable -->
 <!-- /* cSpell:disable */ -->
@@ -117,8 +117,8 @@ isort --profile black --settings-file .isort.cfg myfile.py
 usage: isort [-h] [-V] [--vn] [-v] [--only-modified] [--dedup-headings] [-q]
              [-d] [--overwrite-in-place] [--show-config] [--show-files] [--df]
              [-c] [--ws] [--sp SETTINGS_PATH] [--cr CONFIG_ROOT]
-             [--resolve-all-configs] [--profile PROFILE] [--old-finders]
-             [-j [JOBS]] [--ac] [--interactive] [--format-error FORMAT_ERROR]
+             [--resolve-all-configs] [--profile PROFILE] [-j [JOBS]] [--ac]
+             [--interactive] [--format-error FORMAT_ERROR]
              [--format-success FORMAT_SUCCESS] [--srx] [--filter-files]
              [-s SKIP] [--extend-skip EXTEND_SKIP] [--sg SKIP_GLOB]
              [--extend-skip-glob EXTEND_SKIP_GLOB] [--gitignore]
@@ -131,10 +131,10 @@ usage: isort [-h] [-V] [--vn] [-v] [--only-modified] [--dedup-headings] [-q]
              [--lbi LINES_BEFORE_IMPORTS] [--lai LINES_AFTER_IMPORTS]
              [--lbt LINES_BETWEEN_TYPES] [--le LINE_ENDING] [--ls] [--lss]
              [-m {GRID,VERTICAL,HANGING_INDENT,VERTICAL_HANGING_INDENT,VERTICAL_GRID,VERTICAL_GRID_GROUPED,VERTICAL_GRID_GROUPED_NO_COMMA,NOQA,VERTICAL_HANGING_INDENT_BRACKET,VERTICAL_PREFIX_FROM_MODULE_IMPORT,HANGING_INDENT_WITH_PARENTHESES,BACKSLASH_GRID,0,1,2,3,4,5,6,7,8,9,10,11}]
-             [-n] [--nis] [--ot] [--dt] [--rr] [--reverse-sort]
-             [--sort-order SORT_ORDER] [--sl] [--nsl SINGLE_LINE_EXCLUSIONS]
-             [--tc] [--up] [-l LINE_LENGTH] [--wl WRAP_LENGTH]
-             [--case-sensitive] [--remove-redundant-aliases] [--honor-noqa]
+             [-n] [--nis | --sl] [--ot] [--dt] [--rr] [--reverse-sort]
+             [--sort-order SORT_ORDER] [--nsl SINGLE_LINE_EXCLUSIONS] [--tc]
+             [--up] [-l LINE_LENGTH] [--wl WRAP_LENGTH] [--case-sensitive]
+             [--remove-redundant-aliases] [--honor-noqa]
              [--treat-comment-as-code TREAT_COMMENTS_AS_CODE]
              [--treat-all-comment-as-code] [--formatter FORMATTER] [--color]
              [--ext-format EXT_FORMAT] [--star-first]
@@ -147,7 +147,7 @@ usage: isort [-h] [-V] [--vn] [-v] [--only-modified] [--dedup-headings] [-q]
              [-f KNOWN_FUTURE_LIBRARY] [-o KNOWN_THIRD_PARTY]
              [-p KNOWN_FIRST_PARTY] [--known-local-folder KNOWN_LOCAL_FOLDER]
              [--virtual-env VIRTUAL_ENV] [--conda-env CONDA_ENV]
-             [--py {all,2,27,3,310,311,312,313,36,37,38,39,auto}]
+             [--py {all,2,27,3,310,311,312,313,314,36,37,38,39,auto}]
              [files ...]
 
 Sort Python import definitions alphabetically within logical sections. Run
@@ -207,9 +207,6 @@ general options:
                         include: black, django, pycharm, google, open_stack,
                         plone, attrs, hug, wemake, appnexus. As well as any
                         shared profiles.
-  --old-finders, --magic-placement
-                        Use the old deprecated finder logic that relies on
-                        environment introspection magic.
   -j, --jobs [JOBS]     Number of files to process in parallel. Negative value
                         means use number of CPUs.
   --ac, --atomic        Ensures the output doesn't save if the resulting file
@@ -476,13 +473,13 @@ section output options:
   --conda-env CONDA_ENV
                         Conda environment to use for determining whether a
                         package is third-party
-  --py, --python-version {all,2,27,3,310,311,312,313,36,37,38,39,auto}
+  --py, --python-version {all,2,27,3,310,311,312,313,314,36,37,38,39,auto}
                         Tells isort to set the known standard library based on
                         the specified Python version. Default is to assume any
                         Python 3 version could be the target, and use a union
                         of all stdlib modules across versions. If auto is
                         specified, the version of the interpreter used to run
-                        isort (currently: 313) will be used.
+                        isort (currently: 314) will be used.
 ```
 
 ### Installation on mega-linter Docker image
@@ -490,11 +487,11 @@ section output options:
 - Dockerfile commands :
 ```dockerfile
 # renovate: datasource=pypi depName=black
-ARG PIP_BLACK_VERSION=25.1.0
+ARG PIP_BLACK_VERSION=26.5.1
 # renovate: datasource=pypi depName=isort
-ARG PIP_ISORT_VERSION=6.0.1
+ARG PIP_ISORT_VERSION=8.0.1
 ```
 
 - PIP packages (Python):
-  - [black==25.1.0](https://pypi.org/project/black/25.1.0)
-  - [isort==6.0.1](https://pypi.org/project/isort/6.0.1)
+  - [black==26.5.1](https://pypi.org/project/black/26.5.1)
+  - [isort==8.0.1](https://pypi.org/project/isort/8.0.1)

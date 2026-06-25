@@ -20,7 +20,7 @@ description: How to use ruff (configure, ignore files, ignore errors, help & ver
 
 ## ruff documentation
 
-- Version in MegaLinter: **0.12.5**
+- Version in MegaLinter: **0.15.18**
 - Visit [Official Web Site](https://github.com/astral-sh/ruff#readme){target=_blank}
 - See [How to configure ruff rules](https://docs.astral.sh/ruff/configuration/){target=_blank}
   - If custom `.ruff.toml` config file isn't found, [.ruff.toml](https://github.com/oxsecurity/megalinter/tree/main/TEMPLATES/.ruff.toml){target=_blank} will be used
@@ -43,7 +43,7 @@ description: How to use ruff (configure, ignore files, ignore errors, help & ver
 | PYTHON_RUFF_FILTER_REGEX_INCLUDE        | Custom regex including filter<br/>Ex: `(src\|lib)`                                                                                                                                                                  | Include every file                              |
 | PYTHON_RUFF_FILTER_REGEX_EXCLUDE        | Custom regex excluding filter<br/>Ex: `(test\|examples)`                                                                                                                                                            | Exclude no file                                 |
 | PYTHON_RUFF_CLI_LINT_MODE               | Override default CLI lint mode<br/>- `file`: Calls the linter for each file<br/>- `list_of_files`: Call the linter with the list of files as argument<br/>- `project`: Call the linter from the root of the project | `list_of_files`                                 |
-| PYTHON_RUFF_FILE_EXTENSIONS             | Allowed file extensions. `"*"` matches any extension, `""` matches empty extension. Empty list excludes all files<br/>Ex: `[".py", ""]`                                                                             | `[".py"]`                                       |
+| PYTHON_RUFF_FILE_EXTENSIONS             | Allowed file extensions. `"*"` matches any extension, `""` matches empty extension. Empty list excludes all files<br/>Ex: `[".py", ""]`                                                                             | `[".py", ".pyi", ".ipynb"]`                     |
 | PYTHON_RUFF_FILE_NAMES_REGEX            | File name regex filters. Regular expression list for filtering files by their base names using regex full match. Empty list includes all files<br/>Ex: `["Dockerfile(-.+)?", "Jenkinsfile"]`                        | Include every file                              |
 | PYTHON_RUFF_PRE_COMMANDS                | List of bash commands to run before the linter                                                                                                                                                                      | None                                            |
 | PYTHON_RUFF_POST_COMMANDS               | List of bash commands to run after the linter                                                                                                                                                                       | None                                            |
@@ -69,15 +69,15 @@ This linter is available in the following flavors
 
 |                                                                         <!-- -->                                                                         | Flavor                                                 | Description                                     | Embedded linters |                                                                                                                                                                                       Info |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------|:------------------------------------------------|:----------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/beta/supported-linters/)   | Default MegaLinter Flavor                       |       126        |                 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
-|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/beta/flavors/cupcake/) | MegaLinter for the most commonly used languages |        87        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
-|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/python.ico" alt="" height="32px" class="megalinter-icon"></a>        | [python](https://megalinter.io/beta/flavors/python/)   | Optimized for PYTHON based projects             |        65        |   ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-python/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-python) |
+| <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/images/mega-linter-square.png" alt="" height="32px" class="megalinter-icon"></a> | [all](https://megalinter.io/beta/supported-linters/)   | Default MegaLinter Flavor                       |       137        |                 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter) |
+|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/cupcake.ico" alt="" height="32px" class="megalinter-icon"></a>       | [cupcake](https://megalinter.io/beta/flavors/cupcake/) | MegaLinter for the most commonly used languages |        93        | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-cupcake/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-cupcake) |
+|       <img src="https://github.com/oxsecurity/megalinter/raw/main/docs/assets/icons/python.ico" alt="" height="32px" class="megalinter-icon"></a>        | [python](https://megalinter.io/beta/flavors/python/)   | Optimized for PYTHON based projects             |        70        |   ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/oxsecurity/megalinter-python/beta) ![Docker Pulls](https://img.shields.io/docker/pulls/oxsecurity/megalinter-python) |
 
 ## Behind the scenes
 
 ### How are identified applicable files
 
-- File extensions: `.py`
+- File extensions: `.py`, `.pyi`, `.ipynb`
 
 <!-- markdownlint-disable -->
 <!-- /* cSpell:disable */ -->
@@ -116,24 +116,41 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -h, --help     Print help
-  -V, --version  Print version
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 
 Log levels:
-  -v, --verbose  Enable verbose logging
-  -q, --quiet    Print diagnostics, but nothing else
-  -s, --silent   Disable all logging (but still exit with status code "1" upon detecting
-                 diagnostics)
+  -v, --verbose
+          Enable verbose logging
+
+  -q, --quiet
+          Print diagnostics, but nothing else
+
+  -s, --silent
+          Disable all logging (but still exit with status code "1" upon detecting diagnostics)
 
 Global options:
-      --config <CONFIG_OPTION>  Either a path to a TOML configuration file (`pyproject.toml` or
-                                `ruff.toml`), or a TOML `<KEY> = <VALUE>` pair (such as you might
-                                find in a `ruff.toml` configuration file) overriding a specific
-                                configuration option. Overrides of individual settings using this
-                                option always take precedence over all configuration files,
-                                including configuration files that were also specified using
-                                `--config`
-      --isolated                Ignore all configuration files
+      --config <CONFIG_OPTION>
+          Either a path to a TOML configuration file (`pyproject.toml` or `ruff.toml`), or a TOML
+          `<KEY> = <VALUE>` pair (such as you might find in a `ruff.toml` configuration file)
+          overriding a specific configuration option (e.g., `--config "lint.line-length = 100"` or
+          `--config "format.quote-style = 'single'"`). Overrides of individual settings using this
+          option always take precedence over all configuration files, including configuration files
+          that were also specified using `--config`
+
+      --isolated
+          Ignore all configuration files
+
+      --color <WHEN>
+          Control when colored output is used
+
+          Possible values:
+          - auto:   Display colors if the output goes to an interactive terminal
+          - always: Always display colors
+          - never:  Never display colors
 
 For help with a specific command, see: `ruff help <command>`.
 ```
@@ -143,8 +160,48 @@ For help with a specific command, see: `ruff help <command>`.
 - Dockerfile commands :
 ```dockerfile
 # renovate: datasource=pypi depName=ruff
-ARG PIP_RUFF_VERSION=0.12.5
+ARG PIP_RUFF_VERSION=0.15.18
 ```
 
 - PIP packages (Python):
-  - [ruff==0.12.5](https://pypi.org/project/ruff/0.12.5)
+  - [ruff==0.15.18](https://pypi.org/project/ruff/0.15.18)
+
+## Known errors and resolutions
+
+When this linter fails for a known non-lint reason (remote service unavailable, malformed config, missing credentials, etc.), MegaLinter detects the pattern below in the linter output and surfaces the matching guidance.
+
+### PYTHON_RUFF_ERROR_CONFIG_PARSE
+
+**Detection pattern (regex):**
+
+```text
+(Failed to parse .*(ruff\.toml|pyproject\.toml)|TOML parse error|invalid type: |unknown field )
+```
+
+**Resolution guidance:**
+
+```text
+ruff could not parse its configuration file (`ruff.toml`, `.ruff.toml`, or `pyproject.toml`).
+Resolutions:
+  - Validate the TOML syntax of the file.
+  - Make sure option keys under `[tool.ruff]` / `[tool.ruff.lint]` match the pinned ruff version's schema; deprecated keys are removed in newer releases.
+  - Check for committed merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) in the file.
+```
+
+### PYTHON_RUFF_ERROR_UNKNOWN_RULE
+
+**Detection pattern (regex):**
+
+```text
+(Unknown rule selector|unknown rule code|Unknown rule:|unrecognized selector)
+```
+
+**Resolution guidance:**
+
+```text
+ruff's configuration references a rule code that the pinned ruff version does not know about (renamed, deleted, or not yet released).
+Resolutions:
+  - Check the ruff changelog for renames around the version pinned in MegaLinter.
+  - Update the rule code in your `select` / `ignore` / `extend-select` list to the new name.
+```
+

@@ -2,6 +2,7 @@
 """
 Output results in console
 """
+
 import logging
 
 import terminaltables
@@ -13,8 +14,12 @@ from megalinter.constants import (
     ML_REPO_URL,
     ML_VERSION,
 )
+from megalinter.flavor_factory import is_custom_flavor
 from megalinter.utils import blue
-from megalinter.utils_reporter import log_section_end
+from megalinter.utils_reporter import (
+    build_user_notifications,
+    log_section_end,
+)
 
 
 class ConsoleReporter(Reporter):
@@ -124,6 +129,11 @@ class ConsoleReporter(Reporter):
         for table_line in table.table.splitlines():
             logging.info(table_line)
         logging.info("")
+        user_notifications = build_user_notifications(self.master)
+        if user_notifications:
+            for notice in user_notifications:
+                logging.warning(blue(notice))
+            logging.info("")
         if self.master.flavor_suggestions is not None:
             active_linter_names = [linter.name for linter in self.master.active_linters]
             custom_flavor_command = (
@@ -133,13 +143,15 @@ class ConsoleReporter(Reporter):
             custom_flavor_message = (
                 blue(
                     "Your project could benefit from a custom flavor, "
-                    + "which would allow you to run only the linters you need, and thus improve runtime performances.\n"
+                    + "which would allow you to run only the linters you need, and thus improve runtime performances. "
+                    + "(Skip this info by defining `FLAVOR_SUGGESTIONS: false`)\n"
                 )
                 + f"- Documentation: {ML_DOC_URL}/custom-flavors/\n"
                 f"- Command: `{custom_flavor_command}`"
             )
             if len(self.master.flavor_suggestions) == 1:
-                logging.warning(custom_flavor_message)
+                if not is_custom_flavor():
+                    logging.warning(custom_flavor_message)
             else:
                 build_version = config.get(None, "BUILD_VERSION", DEFAULT_RELEASE)
                 action_version = (
@@ -164,5 +176,6 @@ class ConsoleReporter(Reporter):
                         f"{self.gh_url}/flavors/{suggestion['flavor']}/"
                     )
                     logging.warning(flavor_msg)
-                logging.warning(custom_flavor_message)
+                if not is_custom_flavor():
+                    logging.warning(custom_flavor_message)
             logging.info("")

@@ -10,26 +10,26 @@ description: Hide from linter executables the environment variables that can con
 
 ## Secured env variables
 
-MegaLinter runs on a docker image and calls the linters via command line to gather their results.
+MegaLinter runs in a Docker image and calls the linters via the command line to gather their results.
 
-If you run it from your **CI/CD pipelines**, the docker image may have **access to your environment variables, that can contain secrets** defined in CI/CD variables.
+If you run it from your **CI/CD pipelines**, the Docker image may have **access to your environment variables, which can contain secrets** defined in CI/CD variables.
 
-As it can be complicated to **trust** the authors of all the open-source linters, **MegaLinter removes variables from the environment used to call linters**.
+As it can be complicated to fully trust the authors of all open-source linters, **MegaLinter removes variables from the environment used to call linters**.
 
-Thanks to this feature, you only need to [**trust MegaLinter and its internal python dependencies**](https://github.com/oxsecurity/megalinter/blob/main/pyproject.toml), but there is **no need to trust all the linters that are used** !
+Thanks to this feature, you only need to [trust MegaLinter and its internal Python dependencies](https://github.com/oxsecurity/megalinter/blob/main/pyproject.toml); there is no need to trust all the linters that are used.
 
-You can add secured variables to the default list using configuration property **SECURED_ENV_VARIABLES** in .mega-linter.yml or in an environment variable (priority is given to ENV variables above `.mega-linter.yml` property).
+You can add secured variables to the default list using the configuration property `SECURED_ENV_VARIABLES` in `.mega-linter.yml` or as an environment variable (priority is given to ENV variables over the `.mega-linter.yml` property).
 
 Values can be:
 
 - String (ex: `MY_SECRET_VAR`)
 - Regular Expression (ex: `(MY.*VAR)`)
 
-Environment variables are secured for each command line called (linters, plugins, sarif formatter...) except for [PRE_COMMANDS](config-precommands.md) , ONLY if you define `secured_env: false` in the command.
+Environment variables are secured for each command line called (linters, plugins, SARIF formatter, etc.) except for [PRE_COMMANDS](config-precommands.md), and only if you define `secured_env: false` in the command.
 
 ## Secured configuration examples
 
-- Example of adding extra secured variables `.mega-linter.yml`:
+- Example of adding extra secured variables in `.mega-linter.yml`:
 
 ```yaml
 SECURED_ENV_VARIABLES:
@@ -39,7 +39,7 @@ SECURED_ENV_VARIABLES:
   - (MY.*VAR)  # Regex format
 ```
 
-- Example of adding extra secured variables in CI variables, so they can not be overridden in .mega-linter.yml:
+- Example of adding extra secured variables in CI variables, so they cannot be overridden in `.mega-linter.yml`:
 
 ```shell
 SECURED_ENV_VARIABLES=MY_SECRET_TOKEN,ANOTHER_VAR_CONTAINING_SENSITIVE_DATA,OX_API_KEY
@@ -47,35 +47,61 @@ SECURED_ENV_VARIABLES=MY_SECRET_TOKEN,ANOTHER_VAR_CONTAINING_SENSITIVE_DATA,OX_A
 
 ## Default secured variables
 
-If you override SECURED_ENV_VARIABLES_DEFAULT, it replaces the default list, so it's better to only define SECURED_ENV_VARIABLES to add them to the default list !
+If you override `SECURED_ENV_VARIABLES_DEFAULT`, it replaces the default list, so it's better to only define `SECURED_ENV_VARIABLES` to add items to the default list.
 
-SECURED_ENV_VARIABLES_DEFAULT contains:
+SECURED_ENV_VARIABLES_DEFAULT contains exact names and (regular expressions) matching patterns for commonly used sensitive environment variables:
 
-- GITHUB_TOKEN
 - PAT
 - SYSTEM_ACCESSTOKEN
-- GIT_AUTHORIZATION_BEARER
-- CI_JOB_TOKEN
-- GITLAB_ACCESS_TOKEN_MEGALINTER
-- GITLAB_CUSTOM_CERTIFICATE
-- WEBHOOK_REPORTER_BEARER_TOKEN
-- NODE_TOKEN
-- NPM_TOKEN
-- DOCKER_USERNAME
-- DOCKER_PASSWORD
-- CODECOV_TOKEN
-- GCR_USERNAME
-- GCR_PASSWORD
-- SMTP_PASSWORD
-- CI_SFDX_HARDIS_GITLAB_TOKEN
+- (^|_)(USERNAME)($|_)
+- (^|_)(PASSWORD|PASSWD|PASS|PWD)($|_)
+- (^|_)(TOKEN|ID_TOKEN|ACCESS_TOKEN|REFRESH_TOKEN|BEARER)($|_)
+- (^|_)(SECRET|SECRETS)($|_)
+- (^|_)(API_KEY|APP_KEY|CLIENT_ID|CLIENT_SECRET|CLIENT_KEY|SECRET_KEY|ACCESS_KEY|ACCESS_KEY_ID|PRIVATE_KEY|SSH_KEY|SIGNING_KEY|ENCRYPTION_KEY|LICENSE_KEY)($|_)
+- (^|_)(AUTH|AUTHORIZATION)($|_)
+- (^|_)(CERT|CERTIFICATE|CA_BUNDLE|KUBECONFIG)($|_)
+- (^|_)(CONNECTION_STRING|DATABASE_URL|DB_URL|DSN)($|_)
+- (GOOGLE_APPLICATION_CREDENTIALS)
+- (GCP_SERVICE_ACCOUNT.*)
 - (SFDX_CLIENT_ID_.*)
 - (SFDX_CLIENT_KEY_.*)
+- (^|_)(SLACK|DISCORD|TEAMS|WEBHOOK)_URL($|_)
+
+This compact list is intentionally pattern-based: variables such as `GITHUB_TOKEN`, `CI_JOB_TOKEN`, `NPM_TOKEN`, `GIT_AUTHORIZATION_BEARER`, `AWS_SECRET_ACCESS_KEY`, `AZURE_CLIENT_SECRET`, `OPENAI_API_KEY`, `DOCKER_PASSWORD`, and `SMTP_PASSWORD` are hidden through these broader matchers.
+
+## Security boundaries and threat model
+
+When a linter or plugin command is executed, MegaLinter builds a child-process environment where matched sensitive variables are replaced with `HIDDEN_BY_MEGALINTER`.
+
+This means:
+
+- The original value of a matched environment variable is not accessible from that environment variable entry in the child process.
+
+This does not mean full sandboxing. A malicious dependency can still attempt to collect secrets from other channels, such as:
+
+- Unmatched variables (for example after custom overrides of `SECURED_ENV_VARIABLES_DEFAULT`)
+- Variables explicitly unhidden with `(linter-key)_UNSECURED_ENV_VARIABLES`
+- Files mounted in the workspace, command arguments, or generated config files
+- External credential sources (cloud metadata services, secret managers, network endpoints)
+
+To maximize protection:
+
+- Keep `SECURED_ENV_VARIABLES_DEFAULT` unchanged when possible
+- Add your project-specific patterns with `SECURED_ENV_VARIABLES`
+- Minimize extra credentials exposed to the MegaLinter runtime
+
+Example (compromised dependency scenario):
+
+- If a linter dependency (for example `axios`) is compromised and executes malicious code, it can read the environment passed to that linter process.
+- In that environment, matched variables are already replaced by `HIDDEN_BY_MEGALINTER`.
+- So reading `GITHUB_TOKEN`, `NPM_TOKEN`, `OPENAI_API_KEY`, or `AWS_SECRET_ACCESS_KEY` from the process environment returns `HIDDEN_BY_MEGALINTER`, not the original secret value.
+- The same attack could still try to obtain secrets from other channels listed above (files, arguments, external services, etc.).
 
 ## Unhide variables for linters
 
-You can configure exceptions for a specific linter by defining **(linter-key)_UNSECURED_ENV_VARIABLES**.
+You can configure exceptions for a specific linter by defining `(linter-key)_UNSECURED_ENV_VARIABLES`.
 
-Variable names in this list won't be hidden to the linter commands.
+Variable names in this list won't be hidden from the linter commands.
 
 ```yaml
 TERRAFORM_TFLINT_UNSECURED_ENV_VARIABLES:

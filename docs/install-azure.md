@@ -26,7 +26,7 @@ Add the following to an `azure-pipelines.yaml` file within your code repository:
       - checkout: self
 
       # Pull MegaLinter docker image
-      - script: docker pull oxsecurity/megalinter:v8
+      - script: docker pull ghcr.io/oxsecurity/megalinter:v9
         displayName: Pull MegaLinter
 
       # Run MegaLinter
@@ -35,7 +35,7 @@ Add the following to an `azure-pipelines.yaml` file within your code repository:
             --env-file <(env | grep -e SYSTEM_ -e BUILD_ -e TF_ -e AGENT_) \
             -e SYSTEM_ACCESSTOKEN=$(System.AccessToken) \
             -e GIT_AUTHORIZATION_BEARER=$(System.AccessToken) \
-            oxsecurity/megalinter:v8
+            ghcr.io/oxsecurity/megalinter:v9
         displayName: Run MegaLinter
 
       # Upload MegaLinter reports
@@ -49,7 +49,7 @@ Add the following to an `azure-pipelines.yaml` file within your code repository:
 
 ## Central Repository
 
-Add the following to an `azure-pipelines.yaml` file within a separate repository e.g. 'MegaLinter' repository:
+Add the following to an `azure-pipelines.yaml` file within a separate repository, for example a 'MegaLinter' repository:
 
 ```yaml
 # Run MegaLinter to detect linting and security issues
@@ -68,7 +68,7 @@ steps:
     displayName: Checkout Triggering Repository
 
   # Pull MegaLinter docker image
-  - script: docker pull oxsecurity/megalinter:v8
+  - script: docker pull ghcr.io/oxsecurity/megalinter:v9
     displayName: Pull MegaLinter
 
   # Run MegaLinter
@@ -77,7 +77,7 @@ steps:
         --env-file <(env | grep -e SYSTEM_ -e BUILD_ -e TF_ -e AGENT_) \
         -e SYSTEM_ACCESSTOKEN=$(System.AccessToken) \
         -e GIT_AUTHORIZATION_BEARER=$(System.AccessToken) \
-        oxsecurity/megalinter:v8
+        ghcr.io/oxsecurity/megalinter:v9
     displayName: Run MegaLinter
 
   # Upload MegaLinter reports
@@ -91,13 +91,34 @@ steps:
 
 ## Pull Request Comments
 
-To benefit from Pull Request comments, please follow [configuration instructions](reporters/AzureCommentReporter.md)
+To enable Pull Request comments, follow the [configuration instructions](reporters/AzureCommentReporter.md).
 
 Note: If your pipelines run on Azure DevOps but your source code is hosted on GitHub, and you want status reports to appear on GitHub, you must provide additional repository information to the pipeline. See this [example](https://github.com/firedigger/megalinter-azure-pipelines-with-github-repository) for guidance.
 
 ## Detailed Tutorial
 
-You can also follow this [detailed tutorial](https://github.com/DonKoning/megaLinter) by [DonKoning](https://github.com/DonKoning)
+You can also follow this [detailed tutorial](https://github.com/DonKoning/megaLinter) by [DonKoning](https://github.com/DonKoning).
+
+## Alternative: Azure DevOps Extension (Community)
+
+> **Note:** This is a community-maintained extension and is **not** affiliated with or maintained by the MegaLinter team.
+
+As an alternative to the manual Docker configuration above, the community-maintained [megalinter-ado](https://marketplace.visualstudio.com/items?itemName=DownAtTheBottomOfTheMoleHole.megalinter-ado) Azure DevOps extension provides a native Azure Pipelines task for running MegaLinter.
+
+Install from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=DownAtTheBottomOfTheMoleHole.megalinter-ado), then add the task to your pipeline:
+
+```yaml
+- task: MegaLinter@1
+  displayName: Run MegaLinter
+  inputs:
+    flavor: all
+    fix: true
+    createFixPR: true
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+```
+
+See the [extension repository](https://github.com/DownAtTheBottomOfTheMoleHole/megalinter-ado) for full configuration options.
 
 
 <!-- install-azure-section-end -->

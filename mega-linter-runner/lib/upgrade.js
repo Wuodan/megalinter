@@ -8,7 +8,8 @@ import { asciiArt } from "./ascii.js";
 import { DEFAULT_RELEASE, GLOB_IGNORE_PATTERNS } from "./config.js";
 
 export class MegaLinterUpgrader {
-  constructor() {
+  constructor({ noPrompt = false } = {}) {
+    this.noPrompt = noPrompt;
     this.replacements = [
       // Documentation base URL
       {
@@ -222,20 +223,6 @@ jobs:
 jobs:
   build:
 `,
-      },
-      // V5 to V6 migration rules
-      // GitHub actions
-      {
-        regex: /actions\/checkout@v2/gm,
-        replacement: "actions/checkout@v3",
-        test: "uses: actions/checkout@v2",
-        testRes: "uses: actions/checkout@v3",
-      },
-      {
-        regex: /actions\/checkout@v3/gm,
-        replacement: "actions/checkout@v4",
-        test: "uses: actions/checkout@v3",
-        testRes: "uses: actions/checkout@v4",
       },
       // Documentation base URL
       {
@@ -476,17 +463,17 @@ jobs:
       },
       // Create pull request action
       {
-        regex: /peter-evans\/create-pull-request@v(3|4|5)/gm,
-        replacement: `peter-evans/create-pull-request@v6`,
-        test: "peter-evans/create-pull-request@v5",
-        testRes: `peter-evans/create-pull-request@v6`,
+        regex: /peter-evans\/create-pull-request@v(3|4|5|6|7)/gm,
+        replacement: `peter-evans/create-pull-request@v8`,
+        test: "peter-evans/create-pull-request@v7",
+        testRes: `peter-evans/create-pull-request@v8`,
       },
       // Auto-commit action
       {
-        regex: /stefanzweifel\/git-auto-commit-action@v(2|3|4)/gm,
-        replacement: `stefanzweifel/git-auto-commit-action@v5`,
-        test: "stefanzweifel/git-auto-commit-action@v4",
-        testRes: `stefanzweifel/git-auto-commit-action@v5`,
+        regex: /stefanzweifel\/git-auto-commit-action@v(2|3|4|5|6)/gm,
+        replacement: `stefanzweifel/git-auto-commit-action@v7`,
+        test: "stefanzweifel/git-auto-commit-action@v6",
+        testRes: `stefanzweifel/git-auto-commit-action@v7`,
       },
       // All remaining cases... cross fingers :)
       {
@@ -495,20 +482,91 @@ jobs:
         test: "wesh megalinter/megalinter",
         testRes: "wesh oxsecurity/megalinter",
       },
+      // v8 to v9 migrations rules
+      {
+        regex: /actions\/checkout@v(1|2|3|4|5)/gm,
+        replacement: "actions/checkout@v6",
+        test: "uses: actions/checkout@v4",
+        testRes: "uses: actions/checkout@v6",
+      },
+      // Upload artifact action
+      {
+        regex: /actions\/upload-artifact@v(1|2|3)/gm,
+        replacement: "actions/upload-artifact@v4",
+        test: "uses: actions/upload-artifact@v3",
+        testRes: "uses: actions/upload-artifact@v4",
+      },
+      // V8 to V9 migration rules
+      // Github actions flavors
+      {
+        regex: /oxsecurity\/megalinter\/flavors\/([a-z]*)@v8\.(.*)/gm,
+        replacement: `oxsecurity/megalinter/flavors/$1@${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter/flavors/python@v8.1.2",
+        testRes: `oxsecurity/megalinter/flavors/python@${DEFAULT_RELEASE}`,
+      },
+      {
+        regex: /oxsecurity\/megalinter\/flavors\/([a-z]*)@v8/gm,
+        replacement: `oxsecurity/megalinter/flavors/$1@${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter/flavors/python@v8",
+        testRes: `oxsecurity/megalinter/flavors/python@${DEFAULT_RELEASE}`,
+      },
+      // Docker image flavors
+      {
+        regex: /oxsecurity\/megalinter-([a-z]*):v8\.(.*)/gm,
+        replacement: `oxsecurity/megalinter-$1:${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter-python:v8.1.2",
+        testRes: `oxsecurity/megalinter-python:${DEFAULT_RELEASE}`,
+      },
+      {
+        regex: /oxsecurity\/megalinter-([a-z]*):v8/gm,
+        replacement: `oxsecurity/megalinter-$1:${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter-python:v8",
+        testRes: `oxsecurity/megalinter-python:${DEFAULT_RELEASE}`,
+      },
+      // Github actions using main flavor
+      {
+        regex: /oxsecurity\/megalinter@v8\.(.*)/gm,
+        replacement: `oxsecurity/megalinter@${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter@v8.2.4",
+        testRes: `oxsecurity/megalinter@${DEFAULT_RELEASE}`,
+      },
+      {
+        regex: /oxsecurity\/megalinter@v8/gm,
+        replacement: `oxsecurity/megalinter@${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter@v8",
+        testRes: `oxsecurity/megalinter@${DEFAULT_RELEASE}`,
+      },
+      // Docker images using main flavor
+      {
+        regex: /oxsecurity\/megalinter:v8\.(.*)/gm,
+        replacement: `oxsecurity/megalinter:${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter:v8.2.4",
+        testRes: `oxsecurity/megalinter:${DEFAULT_RELEASE}`,
+      },
+      {
+        regex: /oxsecurity\/megalinter:v8/gm,
+        replacement: `oxsecurity/megalinter:${DEFAULT_RELEASE}`,
+        test: "oxsecurity/megalinter:v8",
+        testRes: `oxsecurity/megalinter:${DEFAULT_RELEASE}`,
+      },
     ];
   }
 
   async run() {
     console.log(asciiArt());
-    const promptsUpgradeRes = await prompts({
-      name: "upgrade",
-      message: c.blueBright(
-        `This assistant will automatically upgrade your local files so you use MegaLinter ${DEFAULT_RELEASE}\nPlease confirm to proceed :)`
-      ),
-      type: "confirm",
-      initial: true,
-    });
-    if (promptsUpgradeRes.upgrade === false) {
+    const confirmedUpgrade = this.noPrompt
+      ? true
+      : (
+        await prompts({
+          name: "upgrade",
+          message: c.blueBright(
+            `This assistant will automatically upgrade your local files so you use MegaLinter ${DEFAULT_RELEASE}\nPlease confirm to proceed :)`
+          ),
+          type: "confirm",
+          initial: true,
+        })
+      ).upgrade;
+    if (confirmedUpgrade === false) {
       console.log(
         `You should upgrade to ${DEFAULT_RELEASE} to benefit from latest versions of linters, and more features :)`
       );
@@ -527,6 +585,9 @@ jobs:
       )
     );
     console.log("");
+    if (this.noPrompt) {
+      return;
+    }
     // Propose to try ox service
     const promptsOXRes = await prompts({
       name: "ox",
@@ -609,4 +670,3 @@ jobs:
     }
   }
 }
-

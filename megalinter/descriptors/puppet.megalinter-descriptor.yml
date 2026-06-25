@@ -1,3 +1,4 @@
+---
 descriptor_id: PUPPET
 descriptor_type: tooling_format
 file_extensions:
@@ -5,6 +6,8 @@ file_extensions:
 linters:
   # PuppetLint
   - linter_name: puppet-lint
+    disabled: true
+    disabled_reason: "<https://github.com/puppetlabs/puppet-lint/issues/251>"
     linter_text: |
       **puppet-lint** is the standard linting tool for Puppet code that enforces the recommended Puppet language style guide and ensures consistent code formatting across Puppet manifests. It focuses on style and formatting rather than syntax validation.
 
@@ -38,9 +41,13 @@ linters:
       dockerfile:
         - |-
           # renovate: datasource=rubygems depName=puppet-lint
-          ARG GEM_PUPPET_LINT_VERSION=4.3.0
+          ARG GEM_PUPPET_LINT_VERSION=5.1.1
       gem:
         - puppet-lint:${GEM_PUPPET_LINT_VERSION}
+    supported_platforms:
+      platform:
+        - linux/amd64
+        - linux/arm64
     ide:
       vscode:
         - name: Puppet VSCode Extension

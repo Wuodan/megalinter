@@ -21,6 +21,8 @@ If [LLM Advisor](../llm-advisor.md) is activated, it will also show its suggesti
 
 Example:
 
+<!-- # MAJOR-RELEASE-IMPACTED -->
+
 ```yaml
       - script: |
           docker run -v $(System.DefaultWorkingDirectory):/tmp/lint \
@@ -33,7 +35,7 @@ Example:
             -e BUILD_BUILD_ID=$(Build.BuildId) \
             -e BUILD_REPOSITORY_ID=$(Build.Repository.ID) \
             -e GIT_AUTHORIZATION_BEARER=$(System.AccessToken) \
-            oxsecurity/megalinter:v8
+            ghcr.io/oxsecurity/megalinter:v9
         displayName: Run MegaLinter
 ```
 
@@ -52,4 +54,10 @@ Example:
 | AZURE_COMMENT_REPORTER_REPLACE_WITH_SPACES | Do not replaces %20 by spaces in repo name if set to false                                              | `true`           |
 | REPORTERS_MARKDOWN_TYPE                    | Set to `simple` to avoid external images in generated markdown                                          | `advanced`       |
 | REPORTERS_MARKDOWN_SUMMARY_TYPE            | Display summary in PR/MR comments as `sections`, `table` or both (`sections-table` or `table-sections`) | `table-sections` |
+| REPORTERS_ACTION_RUN_URL                   | Override default URL of the CI job visualization page                                                   | <!-- -->         |
 | JOB_SUMMARY_ADDITIONAL_MARKDOWN            | Custom markdown to add at the end of the summary message                                                | <!-- -->         |
+| MEGALINTER_MULTIRUN_KEY                    | Key to identify multirun when multiple MegaLinter runs are executed in the same pipeline (ex: `java`)   | <!-- -->         |
+
+## Jenkins Support
+
+This reporter also works when MegaLinter is triggered from a Jenkins Multibranch Pipeline. See [Jenkins installation guide](../install-jenkins.md#pr-comment-reporting-from-jenkins) for details.
